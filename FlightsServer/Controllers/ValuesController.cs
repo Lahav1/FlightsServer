@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Web.Http;
+using System.Web.Http.Results;
+using System.Web.Mvc;
 using FlightsServer.Models;
 
 namespace FlightsServer.Controllers
@@ -22,14 +25,14 @@ namespace FlightsServer.Controllers
             return "value";
         }
 
-        public string Get(string src, string dest, int y, int m, int d, int tickets)
+        public HttpResponseMessage Get(string src, string dest, int y, int m, int d, int tickets)
         {
-            DatabaseHandler dh = new DatabaseHandler();
+            DatabaseHandler dh = new DatabaseHandler(@"C:\Users\USER\Desktop\config.json");
             QueryDispatcher qd = new QueryDispatcher(dh);
-            //var flights = qd.searchflights("haax", "rctp", new datetime(2020, 2, 2), 1);
-            var flights = qd.SearchFlights(src, dest, new DateTime(y, m, d), tickets);
-
-            return flights;
+            string flights = qd.SearchFlights(src, dest, new DateTime(y, m, d), tickets);
+            var response = this.Request.CreateResponse(HttpStatusCode.OK);
+            response.Content = new StringContent(flights, Encoding.UTF8, "application/json");
+            return response;
         }
 
         // POST api/values
