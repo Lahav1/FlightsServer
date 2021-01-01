@@ -95,5 +95,23 @@ namespace FlightsServer.Models
             }
             return flightResults.ToString();
         }
+
+
+        /// <summary>
+        /// The function creates a new reservation from a list of flights.
+        /// </summary>
+        /// <param name="userID">The user that wants to order the flights.</param>
+        /// <param name="flights">The list of all the flights.</param>
+        /// <param name="numberOfTickets">Number of tickets the user want to purchase.</param>
+        public void CreateNewReservation(string userID, List<string> flights, int numberOfTickets)
+        {
+            string maxID = dbh.ExecuteQuery($"SELECT MAX(id) FROM reservation;").Item2[0][0] + 1; // Gets the next available id for the table.
+            List<string> queries = new List<string>();
+            foreach (var flight in flights)
+            {
+                queries.Add($"CALL OrderFlight('{maxID}', '{userID}', '{flight}', {numberOfTickets})");
+            }
+            dbh.ExecuteNonQuery(queries);
+        }
     }
 }

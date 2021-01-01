@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 
 namespace FlightsServer.Models
@@ -106,6 +107,55 @@ namespace FlightsServer.Models
                 return null;
             }
 
+        }
+
+
+        public void ExecuteNonQuery(List<string> queries)
+        {
+            if (this.OpenConnection())
+            {
+                MySqlCommand command = new MySqlCommand();
+                MySqlTransaction transaction;
+
+                // Start a local transaction.
+                transaction = connection.BeginTransaction();
+
+                // Must assign both transaction object and connection
+                // to Command object for a pending local transaction
+                command.Connection  = connection;
+                command.Transaction = transaction;
+                try
+                {
+                    foreach(string query in queries)
+                    {
+                        command.CommandText = query;
+                        command.ExecuteNonQuery();
+                    }
+                    transaction.Commit();
+                }
+                catch(Exception e)
+                {
+                    try
+                    {
+                        transaction.Rollback();
+                    }
+                    catch(SqlException ex)
+                    {
+                        if(transaction.Connection != null)
+                        {
+                            Console.WriteLine($"An exception of type {ex.GetType()} " +
+                                $"was encountered while attempting to roll back the transaction.");
+                        }
+                    }
+                    Console.WriteLine($"An exception of type {e.GetType()} " +
+                       $"was encountered while inserting the data.");
+                    Console.WriteLine("Neither record was written to database.");
+                }
+                finally
+                {
+                    connection.Close();
+                }
+            }
         }
 
 
