@@ -57,22 +57,23 @@ namespace FlightsServer.Controllers
                 {
 
                     qd.CancelReservation(result["reservation_id"].ToString());
+                    response.Content = new StringContent("", Encoding.UTF8, "application/json");
                 }
                 else if (request.RequestUri.AbsolutePath == "/api/Values/make_reservation")
                 {
                     qd.CreateNewReservation(result["email"].ToString(), JsonConvert.DeserializeObject<List<string>>(result["flights"].ToString()), Convert.ToInt32(result["number_of_tickets"]));
+                    response.Content = new StringContent("", Encoding.UTF8, "application/json");
                 }
                 else if (request.RequestUri.AbsolutePath == "/api/Values/user_reservations")
                 {
-                    qd.FindUserReservations(result["user_id"].ToString());
+                    response.Content = new StringContent(qd.FindUserReservations(result["user_id"].ToString()), Encoding.UTF8, "application/json");
+                    
                 }
             }
             catch
             {
                 response.StatusCode = HttpStatusCode.BadRequest;
             }
-
-            response.Content = new StringContent("", Encoding.UTF8, "application/json");
             return response;
 
         }

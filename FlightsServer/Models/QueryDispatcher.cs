@@ -141,6 +141,8 @@ namespace FlightsServer.Models
             JArray reservationsResults = new JArray();
 
             int i = 0;
+            var lastReservationID = tableValues[i][headers["reservation_id"]];
+            var nextReservationID = tableValues[i][headers["reservation_id"]];
             while (i < tableValues.Count)
             {
                 dynamic reservationObj = new JObject();
@@ -148,10 +150,15 @@ namespace FlightsServer.Models
                 reservationObj.number_of_passangers = Convert.ToInt32(tableValues[i][headers["number_of_passangers"]]);
                 reservationObj.price = 0;
 
-                JArray flights = new JArray();
+                JArray reservationFlights = new JArray();
                 while (i < tableValues.Count)
                 {
-                    if(i < tableValues.Count - 1 && tableValues[i][headers["reservation_id"]] == tableValues[i + 1][headers["reservation_id"]])
+                    if(lastReservationID != nextReservationID)
+                    {
+                        lastReservationID = nextReservationID;
+                        break;
+                    }
+                    else
                     {
                         dynamic flight = new JObject();
                         flight.flight_id = tableValues[i][headers["flight_id"]];
@@ -165,7 +172,7 @@ namespace FlightsServer.Models
                         dynamic source_airport = new JObject();
                         source_airport.name = tableValues[i][headers["source_airport_name"]];
                         source_airport.city = tableValues[i][headers["source_airport_city"]];
-                        source_airport.country = tableValues[i][headers["source_airport_city"]];
+                        source_airport.country = tableValues[i][headers["source_airport_country"]];
                         source_airport.latitude = tableValues[i][headers["source_airport_latitude"]];
                         source_airport.longitude = tableValues[i][headers["source_airport_longitude"]];
                         flight.source_airport = source_airport;
@@ -173,7 +180,7 @@ namespace FlightsServer.Models
                         dynamic destination_airport = new JObject();
                         destination_airport.name = tableValues[i][headers["destination_airport_name"]];
                         destination_airport.city = tableValues[i][headers["destination_airport_city"]];
-                        destination_airport.country = tableValues[i][headers["destination_airport_city"]];
+                        destination_airport.country = tableValues[i][headers["destination_airport_country"]];
                         destination_airport.latitude = tableValues[i][headers["destination_airport_latitude"]];
                         destination_airport.longitude = tableValues[i][headers["destination_airport_longitude"]];
                         flight.destination_airport = destination_airport;
@@ -181,16 +188,17 @@ namespace FlightsServer.Models
                         reservationObj.price += Convert.ToInt32(tableValues[i][headers["ticket_price"]]) *
                             Convert.ToInt32(tableValues[i][headers["number_of_passangers"]]);
 
-                        flights.Add(flight);
+                        reservationFlights.Add(flight);
+
+                        if(i < tableValues.Count - 1)
+                        {
+                            nextReservationID = tableValues[i + 1][headers["reservation_id"]];
+                        }
                         i++;
-                    }
-                    else
-                    {
-                        i++;
-                        reservationsResults.Add(flights);
-                        break;
                     }
                 }
+                reservationObj.fiights = reservationFlights;
+                reservationsResults.Add(reservationObj);
             }
             return reservationsResults.ToString();
 
