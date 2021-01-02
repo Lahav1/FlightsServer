@@ -150,6 +150,7 @@ namespace FlightsServer.Models
                     Console.WriteLine($"An exception of type {e.GetType()} " +
                        $"was encountered while inserting the data.");
                     Console.WriteLine("Neither record was written to database.");
+                    throw e;
                 }
                 finally
                 {

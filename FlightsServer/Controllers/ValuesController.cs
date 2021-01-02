@@ -42,32 +42,41 @@ namespace FlightsServer.Controllers
         // POST api/values
         public HttpResponseMessage Post([FromBody] JToken postData, HttpRequestMessage request)
         {
-
-
-            JObject result = (JObject)JsonConvert.DeserializeObject(postData.ToString()); 
+            JObject result = (JObject)JsonConvert.DeserializeObject(postData.ToString());
             DataTable responseObj = new DataTable();
             string json = string.Empty;
             json = JsonConvert.SerializeObject(responseObj);
             DatabaseHandler dh = new DatabaseHandler(@"C:\Users\USER\Desktop\config.json");
             QueryDispatcher qd = new QueryDispatcher(dh);
 
-            qd.CreateNewReservation(result["email"].ToString(), JsonConvert.DeserializeObject<List<string>>(result["flights"].ToString()), Convert.ToInt32(result["number_of_tickets"]));
-
             var response = this.Request.CreateResponse(HttpStatusCode.OK);
+
+            try
+            {
+                if (request.RequestUri.AbsolutePath == "/api/Values/cancel_reservation")
+                {
+
+                    qd.CancelReservation(result["reservation_id"].ToString());
+                }
+                else if (request.RequestUri.AbsolutePath == "/api/Values/make_reservation")
+                {
+                    qd.CreateNewReservation(result["email"].ToString(), JsonConvert.DeserializeObject<List<string>>(result["flights"].ToString()), Convert.ToInt32(result["number_of_tickets"]));
+                }
+                else if (request.RequestUri.AbsolutePath == "/api/Values/user_reservations")
+                {
+                    qd.FindUserReservations(result["user_id"].ToString());
+                }
+            }
+            catch
+            {
+                response.StatusCode = HttpStatusCode.BadRequest;
+            }
+
             response.Content = new StringContent("", Encoding.UTF8, "application/json");
             return response;
 
         }
 
-        public HttpResponseMessage Post(string omer)
-        {
-
-
-            HttpResponseMessage response = null;
-            
-            response = Request.CreateResponse(HttpStatusCode.OK);
-            return response;
-        }
 
         // PUT api/values/5
         public void Put(int id, [FromBody]string value)

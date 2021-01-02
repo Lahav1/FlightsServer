@@ -109,9 +109,91 @@ namespace FlightsServer.Models
             List<string> queries = new List<string>();
             foreach (var flight in flights)
             {
-                queries.Add($"CALL OrderFlight('{maxID}', '{userID}', '{flight}', {numberOfTickets})");
+                queries.Add($"CALL OrderFlight('{maxID}', '{userID}', '{flight}', {numberOfTickets});");
             }
             dbh.ExecuteNonQuery(queries);
+        }
+
+
+        /// <summary>
+        /// The function cancels an existing reservation from the database.
+        /// </summary>
+        /// <param name="reservationID">The reservation's ID.</param>
+        public void CancelReservation(string reservationID)
+        {
+            List<string> queries = new List<string>
+            {
+                $"CALL CancelReservation('{reservationID}');"
+            };
+            dbh.ExecuteNonQuery(queries);
+        }
+
+
+        public string FindUserReservations(string userID)
+        {
+            string query = $"CALL FindUserReservations('{userID}');";
+            Tuple<Dictionary<string, int>, List<List<string>>> reservations = dbh.ExecuteQuery(query);
+
+            var headers = reservations.Item1;
+            var tableValues = reservations.Item2;
+
+            // Create JSON of reservations.
+            JArray reservationsResults = new JArray();
+
+            int i = 0;
+            while (i < tableValues.Count)
+            {
+                dynamic reservationObj = new JObject();
+                reservationObj.reservation_id = tableValues[i][headers["reservation_id"]];
+                reservationObj.number_of_passangers = Convert.ToInt32(tableValues[i][headers["number_of_passangers"]]);
+                reservationObj.price = 0;
+
+                JArray flights = new JArray();
+                while (i < tableValues.Count)
+                {
+                    if(i < tableValues.Count - 1 && tableValues[i][headers["reservation_id"]] == tableValues[i + 1][headers["reservation_id"]])
+                    {
+                        dynamic flight = new JObject();
+                        flight.flight_id = tableValues[i][headers["flight_id"]];
+                        flight.airline = tableValues[i][headers["airline"]];
+                        flight.flight_number = tableValues[i][headers["flight_number"]];
+                        flight.airplane = tableValues[i][headers["airplane"]];
+                        flight.airplane = tableValues[i][headers["airplane"]];
+                        flight.local_departure_time = tableValues[i][headers["local_departure_time"]];
+                        flight.local_arrival_time = tableValues[i][headers["local_arrival_time"]];
+
+                        dynamic source_airport = new JObject();
+                        source_airport.name = tableValues[i][headers["source_airport_name"]];
+                        source_airport.city = tableValues[i][headers["source_airport_city"]];
+                        source_airport.country = tableValues[i][headers["source_airport_city"]];
+                        source_airport.latitude = tableValues[i][headers["source_airport_latitude"]];
+                        source_airport.longitude = tableValues[i][headers["source_airport_longitude"]];
+                        flight.source_airport = source_airport;
+
+                        dynamic destination_airport = new JObject();
+                        destination_airport.name = tableValues[i][headers["destination_airport_name"]];
+                        destination_airport.city = tableValues[i][headers["destination_airport_city"]];
+                        destination_airport.country = tableValues[i][headers["destination_airport_city"]];
+                        destination_airport.latitude = tableValues[i][headers["destination_airport_latitude"]];
+                        destination_airport.longitude = tableValues[i][headers["destination_airport_longitude"]];
+                        flight.destination_airport = destination_airport;
+
+                        reservationObj.price += Convert.ToInt32(tableValues[i][headers["ticket_price"]]) *
+                            Convert.ToInt32(tableValues[i][headers["number_of_passangers"]]);
+
+                        flights.Add(flight);
+                        i++;
+                    }
+                    else
+                    {
+                        i++;
+                        reservationsResults.Add(flights);
+                        break;
+                    }
+                }
+            }
+            return reservationsResults.ToString();
+
         }
     }
 }
