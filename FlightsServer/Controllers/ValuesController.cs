@@ -39,6 +39,26 @@ namespace FlightsServer.Controllers
         }
 
 
+        /// <summary>
+        /// The function is used for auto completion of airport's names.
+        /// </summary>
+        /// <param name="airportName">The substring of the airport name.</param>
+        /// <param name="request">The HTTP request.</param>
+        /// <returns>A JSON string of all the airports matching the substring.</returns>
+        public HttpResponseMessage Get(string airportName, HttpRequestMessage request)
+        {
+            var response = this.Request.CreateResponse(HttpStatusCode.BadRequest);
+            DatabaseHandler dh = new DatabaseHandler(@"C:\Users\USER\Desktop\config.json");
+            QueryDispatcher qd = new QueryDispatcher(dh);
+            string airports = qd.FindAirport(airportName);
+            response = this.Request.CreateResponse(HttpStatusCode.OK);
+            response.Content = new StringContent(airports, Encoding.UTF8, "application/json");
+
+            return response;
+
+        }
+
+
         // POST api/values
         public HttpResponseMessage Post([FromBody] JToken postData, HttpRequestMessage request)
         {

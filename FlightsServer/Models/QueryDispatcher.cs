@@ -129,6 +129,36 @@ namespace FlightsServer.Models
         }
 
 
+        public string FindAirport(string airportName)
+        {
+            int resultsLimit = 5;
+            string query = $"SELECT * FROM autocomplete WHERE name LIKE '%{airportName}%' OR" +
+                $" ICAO LIKE '%{airportName}%' OR IATA LIKE '%{airportName}%' LIMIT {resultsLimit};";
+            Tuple<Dictionary<string, int>, List<List<string>>> reservations = dbh.ExecuteQuery(query);
+
+            var headers = reservations.Item1;
+            var tableValues = reservations.Item2;
+
+            JArray airportsResult = new JArray();
+
+            foreach (var airport in tableValues)
+            {
+                dynamic jAirport    = new JObject();
+                jAirport.name       = airport[headers["name"]];
+                jAirport.IATA       = airport[headers["IATA"]];
+                jAirport.ICAO       = airport[headers["ICAO"]];
+                jAirport.airport_id = airport[headers["airport_id"]];
+                airportsResult.Add(jAirport);
+            }
+            return airportsResult.ToString();
+        }
+
+
+        /// <summary>
+        /// The function returns all customer's reservations.
+        /// </summary>
+        /// <param name="userID">The user's ID.</param>
+        /// <returns>A JSON string of all the reservations the costumer have.</returns>
         public string FindUserReservations(string userID)
         {
             string query = $"CALL FindUserReservations('{userID}');";
@@ -188,15 +218,26 @@ namespace FlightsServer.Models
                         reservationObj.price += Convert.ToInt32(tableValues[i][headers["ticket_price"]]) *
                             Convert.ToInt32(tableValues[i][headers["number_of_passangers"]]);
 
-                        reservationFlights.Add(flight);
 
                         if(i < tableValues.Count - 1)
                         {
                             nextReservationID = tableValues[i + 1][headers["reservation_id"]];
+
+                            if(lastReservationID == nextReservationID)
+                            {
+                                // TODO: Set hour format.
+                                flight.connection_duration =
+                                    (DateTime.Parse(tableValues[i + 1][headers["GMT_departure_time"]].ToString()) -
+                                    DateTime.Parse(tableValues[i][headers["GMT_arrival_time"]].ToString())).ToString();
+                            }
+
                         }
+                        reservationFlights.Add(flight);
+
                         i++;
                     }
                 }
+
                 reservationObj.fiights = reservationFlights;
                 reservationsResults.Add(reservationObj);
             }
