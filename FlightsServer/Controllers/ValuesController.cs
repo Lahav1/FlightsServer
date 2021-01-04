@@ -86,12 +86,25 @@ namespace FlightsServer.Controllers
                 }
                 else if (request.RequestUri.AbsolutePath == "/api/Values/user_reservations")
                 {
-                    response.Content = new StringContent(qd.FindUserReservations(result["user_id"].ToString()), Encoding.UTF8, "application/json");
-                    
+                    response.Content = new StringContent(qd.FindUserReservations(result["user_id"].ToString()), Encoding.UTF8, "application/json");                    
+                } 
+                else if(request.RequestUri.AbsolutePath == "/api/Values/cancel_flight")
+                {
+                    qd.RemoveFlight(result["flight_id"].ToString());
                 }
+                else if(request.RequestUri.AbsolutePath == "/api/Values/add_route")
+                {
+                    qd.AddRoute(result["source_airport"].ToString(), result["destination_airport"].ToString(), result["airline_id"].ToString(), result["equipment"].ToString());
+                }
+                else if (request.RequestUri.AbsolutePath == "/api/Values/remove_route")
+                {
+                    qd.RemoveRoute(result["route_id"].ToString());
+                }
+
             }
-            catch
+            catch (Exception e)
             {
+                Console.WriteLine(e);
                 response.StatusCode = HttpStatusCode.BadRequest;
             }
             return response;

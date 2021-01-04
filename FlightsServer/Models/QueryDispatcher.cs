@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using Newtonsoft.Json.Linq;
+using System.Net;
+using System.Net.Mail;
+
 
 namespace FlightsServer.Models
 {
@@ -128,7 +131,249 @@ namespace FlightsServer.Models
             dbh.ExecuteNonQuery(queries);
         }
 
+        /// <summary>
+        /// The function adds a new airline into the airline table.
+        /// </summary>
+        /// <param name="name">The airline's full name.</param>
+        /// <param name="IATA">The airline's IATA code (2 characters).</param>
+        /// <param name="ICAO">The airline's ICAO code (3 characters).</param>
+        /// <param name="isActive">If the airline is active or not.</param>
+        /// <param name="rating">The airline's rating.</param>
+        public void AddAirline(string name, string IATA, string ICAO, bool isActive, float rating)
+        {
+            if (IATA.Length != 3 || ICAO.Length != 4)
+            {
+                return;
+            }
+            string maxID = dbh.ExecuteQuery("SELECT substr(id, 3) FROM airline ORDER BY substr(id, 3) * 1 DESC LIMIT 1;").Item2[0][0];
+            List<string> query = new List<string>()
+            {
+                $"INSERT INTO airline VALUES ('AL{maxID + 1}', '{name}', '{IATA}', '{ICAO}', {Convert.ToInt32(isActive)}, {rating});"
+            };
+            dbh.ExecuteNonQuery(query);
+        }
 
+        /// <summary>
+        /// The function adds a new airplane into the airplane database.
+        /// </summary>
+        /// <param name="airplaneName">The full name of the airplane.</param>
+        /// <param name="IATA">The IATA code of the airplane (3 characters).</param>
+        /// <param name="ICAO">The IATA code of the airplane (4 characters).</param>
+        /// <param name="cruiseSpeed">The cruise speed of the airplane in kts.</param>
+        /// <param name="numOfSeats">Number of seats in the airplane.</param>
+        public void AddAirplane(string airplaneName, string IATA, string ICAO, int cruiseSpeed, int numOfSeats)
+        {
+            if(IATA.Length != 3 || ICAO.Length != 4)
+            {
+                return;
+            }
+            List<string> query = new List<string>()
+            { 
+                $"INSERT INTO airplane ('{airplaneName}', '{IATA}', '{ICAO}', {cruiseSpeed}, {numOfSeats});"
+            };
+            dbh.ExecuteNonQuery(query);
+        }
+        
+
+        /// <summary>
+        /// The function removes an airplane from the airplane table.
+        /// </summary>
+        /// <param name="IATA">The IATA code of the airplane (3 characters).</param>
+        public void RemoveAirplane(string IATA)
+        {
+            if (IATA.Length != 3)
+            {
+                return;
+            }
+            List<string> query = new List<string>()
+            {
+                $"DELETE FROM airplane WHERE IATA='{IATA}';"
+            };
+            dbh.ExecuteNonQuery(query);
+        }
+
+
+        /// <summary>
+        /// The function adds a new airport to the airport table.
+        /// </summary>
+        /// <param name="name">The full name of the airport.</param>
+        /// <param name="city">The city of the airport.</param>
+        /// <param name="country">The country of the airport.</param>
+        /// <param name="IATA">The airport's IATA code (3 characters).</param>
+        /// <param name="ICAO">The airport's ICAO code (4 characters).</param>
+        /// <param name="lat">The latitude of the airport location.</param>
+        /// <param name="lon">The longitude of the airport location.</param>
+        /// <param name="timezone"></param>
+        public void AddAirport(string name, string city, string country, string IATA, 
+            string ICAO, double lat, double lon, float timezone)
+        {
+            if (IATA.Length != 3 || ICAO.Length != 4 || lat < -90 || lat > 90 || lon < -180 || lon > 180)
+            {
+                return;
+            }
+
+            string maxID = dbh.ExecuteQuery("SELECT substr(id, 3) FROM airport ORDER BY substr(id, 3) * 1 DESC LIMIT 1;").Item2[0][0]; 
+
+
+            List<string> query = new List<string>()
+            {
+                $"INSERT INTO airport VALUES ('AP{maxID}', '{name}', '{city}', '{country}', '{IATA}', '{ICAO}', {lat}, {lon}, {timezone});"
+            };
+            dbh.ExecuteNonQuery(query);
+        }
+
+
+        /// <summary>
+        /// The function removes an airport for the airport table.
+        /// </summary>
+        /// <param name="id">The airport's id.</param>
+        public void RemoveAirport(string id)
+        {
+            List<string> query = new List<string>()
+            {
+                $"DELETE FROM airport WHERE IATA='{id}';"
+                
+            };
+            dbh.ExecuteNonQuery(query);
+        }
+
+
+        /// <summary>
+        /// The function adds a new route into the route table.
+        /// </summary>
+        /// <param name="sourceID">The id of the source airport.</param>
+        /// <param name="destinationID">The id of the destination airport.</param>
+        /// <param name="airlineID">The airline's ID.</param>
+        /// <param name="equipment">The airplanes that can fly that route.</param>
+        public void AddRoute(string sourceID, string destinationID, string airlineID, string equipment)
+        {
+            List<string> query = new List<string>()
+            {
+                $"CALL AddRoute('{sourceID}', '{destinationID}', '{destinationID}', '{equipment}');"
+            };
+            dbh.ExecuteNonQuery(query);
+        }
+
+
+        /// <summary>
+        /// The function removes the route from the route table.
+        /// </summary>
+        /// <param name="routeID">The route's id.</param>
+        public void RemoveRoute(string routeID)
+        {
+            List<string> query = new List<string>()
+            {
+                $"CALL RemoveRoute('{routeID}');"
+            };
+            dbh.ExecuteNonQuery(query);
+        }
+
+
+        /// <summary>
+        /// The function adds a flight into the flight table.
+        /// </summary>
+        /// <param name="routeID">The flight's route ID.</param>
+        /// <param name="departureTimeGMT">The departure time GMT.</param>
+        /// <param name="arrivalTimeGMT">The arrival time GMT.</param>
+        /// <param name="ticketPrice">Ticket price.</param>
+        /// <param name="airplane">Airplane flying the route.</param>
+        public void AddFlight(string routeID, string departureTimeGMT, string arrivalTimeGMT, int ticketPrice, string airplaneIATA)
+        {
+            if(dbh.ExecuteQuery($"SELECT COUNT(id) FROM route WHERE id='{routeID}';").Item2[0][0] == "0" ||
+                dbh.ExecuteQuery($"SELECT COUNT(id) FROM airplane WHERE IATA='{airplaneIATA}';").Item2[0][0] == "0")
+            {
+                return;
+            }
+            var maxID = $"SELECT substr(id, 2) FROM flight ORDER BY substr(id, 2) * 1 DESC LIMIT 1;";
+            var numOfSeats = dbh.ExecuteQuery($"SELECT number_of_seats FROM airplane WHERE IATA='{airplaneIATA}';").Item2[0][0];
+            List<string> query = new List<string>()
+            {
+                $"INSERT INTO flight VALUES ('F{maxID + 1}', '{routeID}', '{departureTimeGMT}', '{arrivalTimeGMT}', {numOfSeats};"
+        };
+
+            dbh.ExecuteNonQuery(query);
+        }
+
+
+        /// <summary>
+        ///  Delete a flight from the flight database.
+        /// </summary>
+        /// <param name="flightID">The flights ID.</param>
+        /// <remarks>When you remove a flight, all the reservations with this flight will also be deleted.</remarks>
+        public void RemoveFlight(string flightID)
+        {
+            string query = $"SELECT departure_time_GMT FROM flight WHERE id='{flightID}';";
+
+            // If it's an old flight, don't remove it.
+            if (DateTime.Compare(DateTime.Parse(dbh.ExecuteQuery(query).Item2[0][0]), DateTime.Now) > 0)
+            {
+                return;
+            }
+            query = $"SELECT id, user FROM reservation WHERE flight='{flightID}';";
+            var reservations = dbh.ExecuteQuery(query);
+
+
+            foreach(var reservation in reservations.Item2)
+            {
+                query = $"CALL FindReservationData({reservation[reservations.Item1["id"]]});";
+                var reservationDataQuery = dbh.ExecuteQuery(query);
+                var reservationData = reservationDataQuery.Item2;
+                var reservationsHeader = reservationDataQuery.Item1;
+
+                //this.CancelReservation(reservation[result.Item1["id"]]);
+                string cancelSubject = $"Cancellation of your {reservation[reservations.Item1["id"]]} flight reservation";
+                string body = $"We are sorry to inform you that due to the cancellation of {reservationData[0][reservationsHeader["airline_name"]]} " +
+                    $"flight {flightID} (flight number {reservationData[0][reservationsHeader["flight_number"]]}) we had " +
+                    $"to cancel your {reservation[reservations.Item1["id"]]} reservation from " +
+                    $"{reservationData[0][reservationsHeader["departure_airport"]]}" +
+                    $" to {reservationData[0][reservationsHeader["destination_airport"]]} on the" +
+                    $" {DateTime.Parse(reservationData[0][reservationsHeader["local_departure_time"]]).ToShortDateString()}.\n" +
+                    $"We apologize for the inconvenience.\n" +
+                    $"Please visit our website to book a new reservation.";
+
+                SendEmail(reservation[reservations.Item1["user"]], cancelSubject, body);
+                CancelReservation(reservation[reservations.Item1["id"]]);
+            }
+        }
+
+        /// <summary>
+        /// The function sends an email to inform the user that his reservation is canceled.
+        /// </summary>
+        /// <param name="destinationEmail">The customer email.</param>
+        /// <param name="subject">The email's subject.</param>
+        /// <param name="body">The email's body.</param>
+        private void SendEmail(string destinationEmail, string subject, string body)
+        {
+
+            var fromAddress = new MailAddress("airplanesbookingdb@gmail.com", "Flights booking website");
+            var toAddress = new MailAddress(destinationEmail, destinationEmail);
+            const string fromPassword = "Ka%(#eA}}%2??_]X";
+
+            var smtp = new SmtpClient
+            {
+                Host = "smtp.gmail.com",
+                Port = 587,
+                EnableSsl = true,
+                DeliveryMethod = SmtpDeliveryMethod.Network,
+                Credentials = new NetworkCredential(fromAddress.Address, fromPassword),
+                Timeout = 20000
+            };
+            using (var message = new MailMessage(fromAddress, toAddress)
+            {
+                Subject = subject,
+                Body = body
+            })
+            {
+                smtp.Send(message);
+            }
+        }
+
+
+        /// <summary>
+        /// The function finds and airport that the 'airportName' is the substring of it.
+        /// </summary>
+        /// <param name="airportName">The substring of the airport.</param>
+        /// <returns>A list of airports names that match the substring.</returns>
         public string FindAirport(string airportName)
         {
             int resultsLimit = 5;
