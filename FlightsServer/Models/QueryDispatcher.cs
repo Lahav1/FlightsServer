@@ -363,9 +363,9 @@ namespace FlightsServer.Models
         private void SendEmail(string destinationEmail, string subject, string body)
         {
 
-            var fromAddress = new MailAddress("airplanesbookingdb@gmail.com", "Flights booking website");
+            var fromAddress = new MailAddress(this.emailAddress, "Flights booking website");
             var toAddress = new MailAddress(destinationEmail, destinationEmail);
-            const string fromPassword = "Ka%(#eA}}%2??_]X";
+            string fromPassword = this.emailPassword;
 
             var smtp = new SmtpClient
             {
