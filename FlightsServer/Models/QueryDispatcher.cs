@@ -12,6 +12,16 @@ namespace FlightsServer.Models
     class QueryDispatcher
     {
         /// <summary>
+        /// The email's address.
+        /// </summary>
+        private string emailAddress;
+
+        /// <summary>
+        /// The email's password.
+        /// </summary>
+        private string emailPassword;
+
+        /// <summary>
         /// The database handler.
         /// </summary>
         private DatabaseHandler dbh;
@@ -20,9 +30,13 @@ namespace FlightsServer.Models
         /// QueryDispatcher constructor.
         /// </summary>
         /// <param name="dbh">The database handler.</param>
-        public QueryDispatcher(DatabaseHandler dbh)
+        public QueryDispatcher(DatabaseHandler dbh, string configFilePath)
         {
             this.dbh = dbh;
+            string config = DatabaseUtils.ReadFile(configFilePath);
+            JObject parsedConfig = JObject.Parse(config);
+            this.emailAddress = parsedConfig["Server"]["Email"]["address"].ToString();
+            this.emailAddress = parsedConfig["Server"]["Email"]["password"].ToString();
         }
 
 

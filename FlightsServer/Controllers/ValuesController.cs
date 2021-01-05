@@ -16,6 +16,8 @@ namespace FlightsServer.Controllers
 {
     public class ValuesController : ApiController
     {
+        static string configFilePath = @"C:\Users\USER\Desktop\config.json";
+
         // GET api/values
         public IEnumerable<string> Get()
         {
@@ -30,8 +32,8 @@ namespace FlightsServer.Controllers
 
         public HttpResponseMessage Get(string src, string dest, int y, int m, int d, int tickets)
         {
-            DatabaseHandler dh = new DatabaseHandler(@"C:\Users\USER\Desktop\config.json");
-            QueryDispatcher qd = new QueryDispatcher(dh);
+            DatabaseHandler dh = new DatabaseHandler(configFilePath);
+            QueryDispatcher qd = new QueryDispatcher(dh, configFilePath);
             string flights = qd.SearchFlights(src, dest, new DateTime(y, m, d), tickets);
             var response = this.Request.CreateResponse(HttpStatusCode.OK);
             response.Content = new StringContent(flights, Encoding.UTF8, "application/json");
@@ -48,8 +50,8 @@ namespace FlightsServer.Controllers
         public HttpResponseMessage Get(string airportName, HttpRequestMessage request)
         {
             var response = this.Request.CreateResponse(HttpStatusCode.BadRequest);
-            DatabaseHandler dh = new DatabaseHandler(@"C:\Users\USER\Desktop\config.json");
-            QueryDispatcher qd = new QueryDispatcher(dh);
+            DatabaseHandler dh = new DatabaseHandler(configFilePath);
+            QueryDispatcher qd = new QueryDispatcher(dh, configFilePath);
             string airports = qd.FindAirport(airportName);
             response = this.Request.CreateResponse(HttpStatusCode.OK);
             response.Content = new StringContent(airports, Encoding.UTF8, "application/json");
@@ -66,8 +68,8 @@ namespace FlightsServer.Controllers
             DataTable responseObj = new DataTable();
             string json = string.Empty;
             json = JsonConvert.SerializeObject(responseObj);
-            DatabaseHandler dh = new DatabaseHandler(@"C:\Users\USER\Desktop\config.json");
-            QueryDispatcher qd = new QueryDispatcher(dh);
+            DatabaseHandler dh = new DatabaseHandler(configFilePath);
+            QueryDispatcher qd = new QueryDispatcher(dh, configFilePath);
 
             var response = this.Request.CreateResponse(HttpStatusCode.OK);
 
