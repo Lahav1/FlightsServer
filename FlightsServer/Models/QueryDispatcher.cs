@@ -108,11 +108,13 @@ namespace FlightsServer.Models
         /// <param name="numberOfTickets">Number of tickets the user want to purchase.</param>
         public void CreateNewReservation(string userID, List<string> flights, int numberOfTickets)
         {
-            string maxID = dbh.ExecuteQuery($"SELECT MAX(id) FROM reservation;").Item2[0][0] + 1; // Gets the next available id for the table.
+            // TODO: fix the max ID.
+            int maxID = Convert.ToInt32(dbh.ExecuteQuery($"SELECT substr(id, 3) FROM reservation ORDER BY substr(id, 3) * 1 DESC LIMIT 1;")
+                .Item2[0][0]); // Gets the next available id for the table.
             List<string> queries = new List<string>();
             foreach (var flight in flights)
             {
-                queries.Add($"CALL OrderFlight('{maxID}', '{userID}', '{flight}', {numberOfTickets});");
+                queries.Add($"CALL OrderFlight('RS{maxID + 1}', '{userID}', '{flight}', {numberOfTickets});");
             }
             dbh.ExecuteNonQuery(queries);
         }
@@ -145,7 +147,7 @@ namespace FlightsServer.Models
             {
                 return;
             }
-            string maxID = dbh.ExecuteQuery("SELECT substr(id, 3) FROM airline ORDER BY substr(id, 3) * 1 DESC LIMIT 1;").Item2[0][0];
+            int maxID = Convert.ToInt32(dbh.ExecuteQuery("SELECT substr(id, 3) FROM airline ORDER BY substr(id, 3) * 1 DESC LIMIT 1;").Item2[0][0]);
             List<string> query = new List<string>()
             {
                 $"INSERT INTO airline VALUES ('AL{maxID + 1}', '{name}', '{IATA}', '{ICAO}', {Convert.ToInt32(isActive)}, {rating});"
@@ -211,13 +213,11 @@ namespace FlightsServer.Models
             {
                 return;
             }
-
-            string maxID = dbh.ExecuteQuery("SELECT substr(id, 3) FROM airport ORDER BY substr(id, 3) * 1 DESC LIMIT 1;").Item2[0][0]; 
-
-
+            int maxID = Convert.ToInt32(dbh.ExecuteQuery("SELECT substr(id, 3) FROM airport ORDER BY substr(id, 3) * 1 DESC LIMIT 1;")
+                .Item2[0][0]); 
             List<string> query = new List<string>()
             {
-                $"INSERT INTO airport VALUES ('AP{maxID}', '{name}', '{city}', '{country}', '{IATA}', '{ICAO}', {lat}, {lon}, {timezone});"
+                $"INSERT INTO airport VALUES ('AP{maxID + 1}', '{name}', '{city}', '{country}', '{IATA}', '{ICAO}', {lat}, {lon}, {timezone});"
             };
             dbh.ExecuteNonQuery(query);
         }
@@ -231,7 +231,7 @@ namespace FlightsServer.Models
         {
             List<string> query = new List<string>()
             {
-                $"DELETE FROM airport WHERE IATA='{id}';"
+                $"DELETE FROM airport WHERE id='{id}';"
                 
             };
             dbh.ExecuteNonQuery(query);
@@ -284,10 +284,15 @@ namespace FlightsServer.Models
             {
                 return;
             }
-            var maxID = $"SELECT substr(id, 2) FROM flight ORDER BY substr(id, 2) * 1 DESC LIMIT 1;";
+
+
+
+            int maxID = Convert.ToInt32(dbh.ExecuteQuery("SELECT substr(id, 2) FROM airport ORDER BY substr(id, 2) * 1 DESC LIMIT 1;")
+                .Item2[0][0]);
             var numOfSeats = dbh.ExecuteQuery($"SELECT number_of_seats FROM airplane WHERE IATA='{airplaneIATA}';").Item2[0][0];
             List<string> query = new List<string>()
             {
+                // TODO: fix MAXID.
                 $"INSERT INTO flight VALUES ('F{maxID + 1}', '{routeID}', '{departureTimeGMT}', '{arrivalTimeGMT}', {numOfSeats};"
         };
 
@@ -320,7 +325,6 @@ namespace FlightsServer.Models
                 var reservationData = reservationDataQuery.Item2;
                 var reservationsHeader = reservationDataQuery.Item1;
 
-                //this.CancelReservation(reservation[result.Item1["id"]]);
                 string cancelSubject = $"Cancellation of your {reservation[reservations.Item1["id"]]} flight reservation";
                 string body = $"We are sorry to inform you that due to the cancellation of {reservationData[0][reservationsHeader["airline_name"]]} " +
                     $"flight {flightID} (flight number {reservationData[0][reservationsHeader["flight_number"]]}) we had " +
@@ -470,7 +474,6 @@ namespace FlightsServer.Models
 
                             if(lastReservationID == nextReservationID)
                             {
-                                // TODO: Set hour format.
                                 flight.connection_duration =
                                     (DateTime.Parse(tableValues[i + 1][headers["GMT_departure_time"]].ToString()) -
                                     DateTime.Parse(tableValues[i][headers["GMT_arrival_time"]].ToString())).ToString();
@@ -487,7 +490,6 @@ namespace FlightsServer.Models
                 reservationsResults.Add(reservationObj);
             }
             return reservationsResults.ToString();
-
         }
     }
 }
