@@ -15,12 +15,14 @@ using System.Web.Mvc;
 using FlightsServer.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Web.Http.Cors;
 
 namespace FlightsServer.Controllers
 {
+    [EnableCors(origins: "*", headers: "*", methods: "*")]
     public class ValuesController : ApiController
     {
-        static string configFilePath = @"C:\Users\USER\Desktop\config.json";
+        static string configFilePath = @"D:\config.json";
 
         // GET api/values
         public IEnumerable<string> Get()
@@ -118,7 +120,6 @@ namespace FlightsServer.Controllers
             }
             response.Headers.Add("Access-Control-Allow-Origin", "*");
             return response;
-
         }
 
 
