@@ -123,8 +123,16 @@ namespace FlightsServer.Models
         public void CreateNewReservation(string userID, List<string> flights, int numberOfTickets)
         {
             // TODO: fix the max ID.
-            int maxID = Convert.ToInt32(dbh.ExecuteQuery($"SELECT substr(id, 3) FROM reservation ORDER BY substr(id, 3) * 1 DESC LIMIT 1;")
-                .Item2[0][0]); // Gets the next available id for the table.
+            int maxID = 0;
+            try
+            {
+                maxID = Convert.ToInt32(dbh.ExecuteQuery($"SELECT substr(id, 3) FROM reservation ORDER BY substr(id, 3) * 1 DESC LIMIT 1;")
+                    .Item2[0][0]); // Gets the next available id for the table.
+
+            } catch
+            {
+                // Creating first user.
+            }
             List<string> queries = new List<string>();
             foreach (var flight in flights)
             {
@@ -324,7 +332,7 @@ namespace FlightsServer.Models
             string query = $"SELECT departure_time_GMT FROM flight WHERE id='{flightID}';";
 
             // If it's an old flight, don't remove it.
-            if (DateTime.Compare(DateTime.Parse(dbh.ExecuteQuery(query).Item2[0][0]), DateTime.Now) > 0)
+            if (DateTime.Compare(DateTime.Parse(dbh.ExecuteQuery(query).Item2[0][0]), DateTime.Now) < 0)
             {
                 return;
             }
@@ -499,7 +507,6 @@ namespace FlightsServer.Models
                         i++;
                     }
                 }
-
                 reservationObj.fiights = reservationFlights;
                 reservationsResults.Add(reservationObj);
             }

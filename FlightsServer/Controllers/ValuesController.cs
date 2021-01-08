@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
+using System.Web;
 using System.Web.Http;
 using System.Web.Http.Results;
 using System.Web.Mvc;
@@ -37,6 +41,7 @@ namespace FlightsServer.Controllers
             string flights = qd.SearchFlights(src, dest, new DateTime(y, m, d), tickets);
             var response = this.Request.CreateResponse(HttpStatusCode.OK);
             response.Content = new StringContent(flights, Encoding.UTF8, "application/json");
+            response.Headers.Add("Access-Control-Allow-Origin", "*");
             return response;
         }
 
@@ -55,11 +60,13 @@ namespace FlightsServer.Controllers
             string airports = qd.FindAirport(airportName);
             response = this.Request.CreateResponse(HttpStatusCode.OK);
             response.Content = new StringContent(airports, Encoding.UTF8, "application/json");
+            response.Headers.Add("Access-Control-Allow-Origin", "*");
+
+
 
             return response;
 
         }
-
 
         // POST api/values
         public HttpResponseMessage Post([FromBody] JToken postData, HttpRequestMessage request)
@@ -109,6 +116,7 @@ namespace FlightsServer.Controllers
                 Console.WriteLine(e);
                 response.StatusCode = HttpStatusCode.BadRequest;
             }
+            response.Headers.Add("Access-Control-Allow-Origin", "*");
             return response;
 
         }
