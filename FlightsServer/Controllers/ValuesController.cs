@@ -107,7 +107,7 @@ namespace FlightsServer.Controllers
                 }
                 else if(request.RequestUri.AbsolutePath == "/api/Values/cancel_flight")
                 {
-                    qd.RemoveFlight(result["flight_id"].ToString());
+                    return qd.RemoveFlight(result["flight_id"].ToString());
                 }
                 else if(request.RequestUri.AbsolutePath == "/api/Values/add_route")
                 {
@@ -119,9 +119,9 @@ namespace FlightsServer.Controllers
                 }
                 else if (request.RequestUri.AbsolutePath == "/api/Values/add_airport")
                 {
-                    qd.AddAirport(result["name"].ToString(), result["name"].ToString(), result["name"].ToString(),
+                    return qd.AddAirport(result["name"].ToString(), result["name"].ToString(), result["name"].ToString(),
                         result["name"].ToString(), result["name"].ToString(), Convert.ToDouble(result["name"].ToString()),
-                        Convert.ToDouble(result["name"].ToString()), Convert.ToDouble(result["name"].ToString());
+                        Convert.ToDouble(result["name"].ToString()), Convert.ToDouble(result["name"].ToString()));
                 }
                 else if (request.RequestUri.AbsolutePath == "/api/Values/remove_airport")
                 {
@@ -129,12 +129,12 @@ namespace FlightsServer.Controllers
                 }
                 else if (request.RequestUri.AbsolutePath == "/api/Values/add_airplane")
                 {
-                    qd.AddAirplane(result["name"].ToString(), result["IATA"].ToString(), result["ICAO"].ToString(),
+                    return qd.AddAirplane(result["name"].ToString(), result["IATA"].ToString(), result["ICAO"].ToString(),
                         Convert.ToInt32(result["name"].ToString()), Convert.ToInt32(result["name"].ToString()));
                 }
                 else if (request.RequestUri.AbsolutePath == "/api/Values/remove_airplane")
                 {
-                    qd.RemoveAirplane(result["IATA"].ToString());
+                    return qd.RemoveAirplane(result["IATA"].ToString());
                 }
                 else if (request.RequestUri.AbsolutePath == "/api/Values/sign_up")
                 {
