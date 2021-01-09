@@ -192,14 +192,18 @@ namespace FlightsServer.Models
 
         }
 
-        //public HttpResponseMessage RemoveAirline(string airlineID)
-        //{
-        //    HttpResponseMessage response = new HttpResponseMessage();
-        //    response.StatusCode = HttpStatusCode.OK;
+        public HttpResponseMessage RemoveAirline(string airlineID)
+        {
+            HttpResponseMessage response = new HttpResponseMessage();
+            response.StatusCode = HttpStatusCode.OK;
 
-        //    dbh.ExecuteNonQuery(query);
-
-        //}
+            List<string> query = new List<string>()
+            {
+                $"DELETE FROM airline WHERE id='{airlineID}');"
+            };
+            dbh.ExecuteNonQuery(query);
+            return response;
+        }
 
 
         /// <summary>

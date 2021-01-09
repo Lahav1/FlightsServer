@@ -141,10 +141,10 @@ namespace FlightsServer.Controllers
                     return qd.AddAirline(result["name"].ToString(), result["IATA"].ToString(), result["ICAO"].ToString(), 
                         bool.Parse(result["is_active"].ToString()), Convert.ToInt32(result["rating"].ToString()));
                 }
-                //else if (request.RequestUri.AbsolutePath == "/api/Values/remove_airline")
-                //{
-                //    return qd.RemoveAirline(result["id"].ToString());
-                //}
+                else if (request.RequestUri.AbsolutePath == "/api/Values/remove_airline")
+                {
+                    return qd.RemoveAirline(result["id"].ToString());
+                }
                 else if (request.RequestUri.AbsolutePath == "/api/Values/sign_up")
                 {
                     return qd.SignUp(result["email"].ToString(), result["full_name"].ToString(), DateTime.Parse(result["DOB"].ToString()), result["passport_id"].ToString());
