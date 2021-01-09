@@ -514,7 +514,7 @@ namespace FlightsServer.Models
                     DateTime.Parse(tableValues[0][headers["GMT_departure_time"]])).ToString();
 
 
-                reservationObj.fiights = reservationFlights;
+                reservationObj.flights = reservationFlights;
                 reservationsResults.Add(reservationObj);
             }
             return reservationsResults.ToString();
