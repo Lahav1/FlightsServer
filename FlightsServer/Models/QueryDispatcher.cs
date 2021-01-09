@@ -354,14 +354,14 @@ namespace FlightsServer.Models
                 return respone;
             }
 
-            int maxID = Convert.ToInt32(dbh.ExecuteQuery("SELECT substr(id, 2) FROM airport ORDER BY substr(id, 2) * 1 DESC LIMIT 1;")
+            int maxID = Convert.ToInt32(dbh.ExecuteQuery("SELECT substr(id, 2) FROM flight ORDER BY substr(id, 2) * 1 DESC LIMIT 1;")
                 .Item2[0][0]);
             var numOfSeats = dbh.ExecuteQuery($"SELECT number_of_seats FROM airplane WHERE IATA='{airplaneIATA}';").Item2[0][0];
             List<string> query = new List<string>()
             {
                 // TODO: fix MAXID.
                 $"INSERT INTO flight VALUES ('F{maxID + 1}', '{routeID}', '{departureTimeGMT}', '{arrivalTimeGMT}', {numOfSeats}, " +
-                $"{ticketPrice}, '{airplaneIATA})';"
+                $"{ticketPrice}, '{airplaneIATA}');"
         };
 
             dbh.ExecuteNonQuery(query);
