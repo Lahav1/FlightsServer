@@ -116,6 +116,10 @@ namespace FlightsServer.Controllers
                 {
                     return qd.SignUp(result["email"].ToString(), result["full_name"].ToString(), DateTime.Parse(result["DOB"].ToString()), result["passport_id"].ToString());
                 }
+                else if(request.RequestUri.AbsolutePath == "/api/Values/is_admin")
+                {
+                    return qd.SignUp(result["email"].ToString());
+                }
 
             }
             catch (Exception e)

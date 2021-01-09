@@ -556,5 +556,29 @@ namespace FlightsServer.Models
             dbh.ExecuteNonQuery(new List<string>() { query });
             return response;
         }
+
+
+        /// <summary>
+        /// The function checks if the email and password are of an admin account.
+        /// </summary>
+        /// <param name="email">The admin's email.</param>
+        /// <param name="password">The admin's password.</param>
+        /// <returns></returns>
+        public string IsAdmin(string email, string password)
+        {
+            dynamic result = new JObject();
+            string query = $"SELECT * FROM admin WHERE user_email='{email}';";
+            Tuple<Dictionary<string, int>, List<List<string>>> reservations = dbh.ExecuteQuery(query);
+            var headers = reservations.Item1;
+            var tableValues = reservations.Item2;
+            if(tableValues[0].Count > 0 && tableValues[0][headers["password"]] == password)
+            {
+                result.is_admin = "true";
+                return result;
+            }
+            result.is_admin = "false";
+            return result;
+
+        }
     }
 }
