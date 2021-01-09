@@ -121,8 +121,11 @@ namespace FlightsServer.Models
         /// <param name="userEmail">The user that wants to order the flights.</param>
         /// <param name="flights">The list of all the flights.</param>
         /// <param name="numberOfTickets">Number of tickets the user want to purchase.</param>
-        public void CreateNewReservation(string userEmail, List<string> flights, int numberOfTickets)
+        public HttpResponseMessage CreateNewReservation(string userEmail, List<string> flights, int numberOfTickets)
         {
+            HttpResponseMessage response = new HttpResponseMessage();
+            response.StatusCode = HttpStatusCode.OK;
+
             int maxID = 0;
             try
             {
@@ -133,12 +136,18 @@ namespace FlightsServer.Models
             {
                 // Creating first user.
             }
+            if (Convert.ToInt32(dbh.ExecuteQuery($"SELECT COUNT(*) FROM user WHERE email='{userEmail}';").Item2[0][0]) == 0)
+            {
+                response.StatusCode = HttpStatusCode.BadRequest;
+                return response;
+            }
             List<string> queries = new List<string>();
             foreach (var flight in flights)
             {
                 queries.Add($"CALL OrderFlight('RS{maxID + 1}', '{userEmail}', '{flight}', {numberOfTickets});");
             }
             dbh.ExecuteNonQuery(queries);
+            return response;
         }
 
 

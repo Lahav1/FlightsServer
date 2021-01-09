@@ -92,8 +92,9 @@ namespace FlightsServer.Controllers
                 }
                 else if (request.RequestUri.AbsolutePath == "/api/Values/make_reservation")
                 {
-                    qd.CreateNewReservation(result["email"].ToString(), JsonConvert.DeserializeObject<List<string>>(result["flights"].ToString()), Convert.ToInt32(result["number_of_tickets"]));
+                    response = qd.CreateNewReservation(result["email"].ToString(), JsonConvert.DeserializeObject<List<string>>(result["flights"].ToString()), Convert.ToInt32(result["number_of_tickets"]));
                     response.Content = new StringContent("", Encoding.UTF8, "application/json");
+                    return response;
                 }
                 else if (request.RequestUri.AbsolutePath == "/api/Values/user_reservations")
                 {
