@@ -199,7 +199,7 @@ namespace FlightsServer.Models
 
             List<string> query = new List<string>()
             {
-                $"DELETE FROM airline WHERE id='{airlineID}');"
+                $"DELETE FROM airline WHERE id='{airlineID}';"
             };
             dbh.ExecuteNonQuery(query);
             return response;
@@ -226,7 +226,7 @@ namespace FlightsServer.Models
             }
             List<string> query = new List<string>()
             { 
-                $"INSERT INTO airplane ('{airplaneName}', '{IATA}', '{ICAO}', {cruiseSpeed}, {numOfSeats});"
+                $"INSERT INTO airplane VALUES ('{airplaneName}', '{IATA}', '{ICAO}', {cruiseSpeed}, {numOfSeats});"
             };
             dbh.ExecuteNonQuery(query);
             return response;

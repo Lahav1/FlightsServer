@@ -22,7 +22,7 @@ namespace FlightsServer.Controllers
     [EnableCors(origins: "*", headers: "*", methods: "*")]
     public class ValuesController : ApiController
     {
-        static string configFilePath = @"C:\Users\USER\Desktop\config.json";
+        static string configFilePath = @"D:\config.json";
 
         // GET api/values
         public IEnumerable<string> Get()
