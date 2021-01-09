@@ -118,7 +118,7 @@ namespace FlightsServer.Controllers
                 }
                 else if(request.RequestUri.AbsolutePath == "/api/Values/is_admin")
                 {
-                    return qd.SignUp(result["email"].ToString());
+                    response.Content = new StringContent(qd.IsAdmin(result["email"].ToString(), result["password"].ToString()), Encoding.UTF8, "application/json");
                 }
 
             }
