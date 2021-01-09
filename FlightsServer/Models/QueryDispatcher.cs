@@ -172,11 +172,15 @@ namespace FlightsServer.Models
         /// <param name="ICAO">The airline's ICAO code (3 characters).</param>
         /// <param name="isActive">If the airline is active or not.</param>
         /// <param name="rating">The airline's rating.</param>
-        public void AddAirline(string name, string IATA, string ICAO, bool isActive, float rating)
+        public HttpResponseMessage AddAirline(string name, string IATA, string ICAO, bool isActive, float rating)
         {
+            HttpResponseMessage response = new HttpResponseMessage();
+            response.StatusCode = HttpStatusCode.OK;
+
             if (IATA.Length != 3 || ICAO.Length != 4)
             {
-                return;
+                response.StatusCode = HttpStatusCode.BadRequest;
+                return response;
             }
             int maxID = Convert.ToInt32(dbh.ExecuteQuery("SELECT substr(id, 3) FROM airline ORDER BY substr(id, 3) * 1 DESC LIMIT 1;").Item2[0][0]);
             List<string> query = new List<string>()
@@ -184,6 +188,8 @@ namespace FlightsServer.Models
                 $"INSERT INTO airline VALUES ('AL{maxID + 1}', '{name}', '{IATA}', '{ICAO}', {Convert.ToInt32(isActive)}, {rating});"
             };
             dbh.ExecuteNonQuery(query);
+            return response;
+
         }
 
         /// <summary>
@@ -194,35 +200,45 @@ namespace FlightsServer.Models
         /// <param name="ICAO">The IATA code of the airplane (4 characters).</param>
         /// <param name="cruiseSpeed">The cruise speed of the airplane in kts.</param>
         /// <param name="numOfSeats">Number of seats in the airplane.</param>
-        public void AddAirplane(string airplaneName, string IATA, string ICAO, int cruiseSpeed, int numOfSeats)
+        public HttpResponseMessage AddAirplane(string airplaneName, string IATA, string ICAO, int cruiseSpeed, int numOfSeats)
         {
-            if(IATA.Length != 3 || ICAO.Length != 4)
+            HttpResponseMessage response = new HttpResponseMessage();
+            response.StatusCode = HttpStatusCode.OK;
+
+            if (IATA.Length != 3 || ICAO.Length != 4)
             {
-                return;
+                response.StatusCode = HttpStatusCode.BadRequest;
+                return response;
             }
             List<string> query = new List<string>()
             { 
                 $"INSERT INTO airplane ('{airplaneName}', '{IATA}', '{ICAO}', {cruiseSpeed}, {numOfSeats});"
             };
             dbh.ExecuteNonQuery(query);
+            return response;
         }
-        
+
 
         /// <summary>
         /// The function removes an airplane from the airplane table.
         /// </summary>
         /// <param name="IATA">The IATA code of the airplane (3 characters).</param>
-        public void RemoveAirplane(string IATA)
+        public HttpResponseMessage RemoveAirplane(string IATA)
         {
+            HttpResponseMessage response = new HttpResponseMessage();
+            response.StatusCode = HttpStatusCode.OK;
+
             if (IATA.Length != 3)
             {
-                return;
+                response.StatusCode = HttpStatusCode.BadRequest;
+                return response;
             }
             List<string> query = new List<string>()
             {
                 $"DELETE FROM airplane WHERE IATA='{IATA}';"
             };
             dbh.ExecuteNonQuery(query);
+            return response;
         }
 
 
@@ -237,12 +253,16 @@ namespace FlightsServer.Models
         /// <param name="lat">The latitude of the airport location.</param>
         /// <param name="lon">The longitude of the airport location.</param>
         /// <param name="timezone"></param>
-        public void AddAirport(string name, string city, string country, string IATA, 
-            string ICAO, double lat, double lon, float timezone)
+        public HttpResponseMessage AddAirport(string name, string city, string country, string IATA, 
+            string ICAO, double lat, double lon, double timezone)
         {
+            HttpResponseMessage response = new HttpResponseMessage();
+            response.StatusCode = HttpStatusCode.OK;
+
             if (IATA.Length != 3 || ICAO.Length != 4 || lat < -90 || lat > 90 || lon < -180 || lon > 180)
             {
-                return;
+                response.StatusCode = HttpStatusCode.BadRequest;
+                return response;
             }
             int maxID = Convert.ToInt32(dbh.ExecuteQuery("SELECT substr(id, 3) FROM airport ORDER BY substr(id, 3) * 1 DESC LIMIT 1;")
                 .Item2[0][0]); 
@@ -251,6 +271,7 @@ namespace FlightsServer.Models
                 $"INSERT INTO airport VALUES ('AP{maxID + 1}', '{name}', '{city}', '{country}', '{IATA}', '{ICAO}', {lat}, {lon}, {timezone});"
             };
             dbh.ExecuteNonQuery(query);
+            return response;
         }
 
 
@@ -308,15 +329,16 @@ namespace FlightsServer.Models
         /// <param name="arrivalTimeGMT">The arrival time GMT.</param>
         /// <param name="ticketPrice">Ticket price.</param>
         /// <param name="airplane">Airplane flying the route.</param>
-        public void AddFlight(string routeID, string departureTimeGMT, string arrivalTimeGMT, int ticketPrice, string airplaneIATA)
+        public HttpResponseMessage AddFlight(string routeID, string departureTimeGMT, string arrivalTimeGMT, int ticketPrice, string airplaneIATA)
         {
-            if(dbh.ExecuteQuery($"SELECT COUNT(id) FROM route WHERE id='{routeID}';").Item2[0][0] == "0" ||
+            var respone = new HttpResponseMessage();
+            respone.StatusCode = HttpStatusCode.OK;
+            if (dbh.ExecuteQuery($"SELECT COUNT(id) FROM route WHERE id='{routeID}';").Item2[0][0] == "0" ||
                 dbh.ExecuteQuery($"SELECT COUNT(id) FROM airplane WHERE IATA='{airplaneIATA}';").Item2[0][0] == "0")
             {
-                return;
+                respone.StatusCode = HttpStatusCode.BadRequest;
+                return respone;
             }
-
-
 
             int maxID = Convert.ToInt32(dbh.ExecuteQuery("SELECT substr(id, 2) FROM airport ORDER BY substr(id, 2) * 1 DESC LIMIT 1;")
                 .Item2[0][0]);
@@ -324,10 +346,12 @@ namespace FlightsServer.Models
             List<string> query = new List<string>()
             {
                 // TODO: fix MAXID.
-                $"INSERT INTO flight VALUES ('F{maxID + 1}', '{routeID}', '{departureTimeGMT}', '{arrivalTimeGMT}', {numOfSeats};"
+                $"INSERT INTO flight VALUES ('F{maxID + 1}', '{routeID}', '{departureTimeGMT}', '{arrivalTimeGMT}', {numOfSeats}, " +
+                $"{ticketPrice}, '{airplaneIATA}';"
         };
 
             dbh.ExecuteNonQuery(query);
+            return respone;
         }
 
 
@@ -336,14 +360,18 @@ namespace FlightsServer.Models
         /// </summary>
         /// <param name="flightID">The flights ID.</param>
         /// <remarks>When you remove a flight, all the reservations with this flight will also be deleted.</remarks>
-        public void RemoveFlight(string flightID)
+        public HttpResponseMessage RemoveFlight(string flightID)
         {
+            HttpResponseMessage response = new HttpResponseMessage();
+            response.StatusCode = HttpStatusCode.OK;
+
             string query = $"SELECT departure_time_GMT FROM flight WHERE id='{flightID}';";
 
             // If it's an old flight, don't remove it.
             if (DateTime.Compare(DateTime.Parse(dbh.ExecuteQuery(query).Item2[0][0]), DateTime.Now) < 0)
             {
-                return;
+                response.StatusCode = HttpStatusCode.BadRequest;
+                return response;
             }
             query = $"SELECT id, user FROM reservation WHERE flight='{flightID}';";
             var reservations = dbh.ExecuteQuery(query);
@@ -370,6 +398,7 @@ namespace FlightsServer.Models
                 SendEmail(reservation[reservations.Item1["user"]], cancelSubject, body);
                 CancelReservation(reservation[reservations.Item1["id"]]);
             }
+            return response;
         }
 
         /// <summary>
@@ -538,7 +567,7 @@ namespace FlightsServer.Models
         /// <param name="fullName">The user's full name.</param>
         /// <param name="DOB">The user date of birth.</param>
         /// <param name="passportID">The user's passport id (not unique).</param>
-        /// <returns></returns>
+        /// <returns>If the user was added or not.</returns>
         public HttpResponseMessage SignUp(string email, string fullName, DateTime DOB, string passportID)
         {
             HttpResponseMessage response = new HttpResponseMessage();
