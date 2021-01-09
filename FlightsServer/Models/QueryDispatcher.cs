@@ -172,7 +172,7 @@ namespace FlightsServer.Models
         /// <param name="ICAO">The airline's ICAO code (3 characters).</param>
         /// <param name="isActive">If the airline is active or not.</param>
         /// <param name="rating">The airline's rating.</param>
-        public HttpResponseMessage AddAirline(string name, string IATA, string ICAO, bool isActive, float rating)
+        public HttpResponseMessage AddAirline(string name, string IATA, string ICAO, bool isActive, double rating)
         {
             HttpResponseMessage response = new HttpResponseMessage();
             response.StatusCode = HttpStatusCode.OK;
@@ -191,6 +191,16 @@ namespace FlightsServer.Models
             return response;
 
         }
+
+        //public HttpResponseMessage RemoveAirline(string airlineID)
+        //{
+        //    HttpResponseMessage response = new HttpResponseMessage();
+        //    response.StatusCode = HttpStatusCode.OK;
+
+        //    dbh.ExecuteNonQuery(query);
+
+        //}
+
 
         /// <summary>
         /// The function adds a new airplane into the airplane database.

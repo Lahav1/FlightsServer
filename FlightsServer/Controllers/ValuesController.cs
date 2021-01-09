@@ -119,9 +119,9 @@ namespace FlightsServer.Controllers
                 }
                 else if (request.RequestUri.AbsolutePath == "/api/Values/add_airport")
                 {
-                    return qd.AddAirport(result["name"].ToString(), result["name"].ToString(), result["name"].ToString(),
-                        result["name"].ToString(), result["name"].ToString(), Convert.ToDouble(result["name"].ToString()),
-                        Convert.ToDouble(result["name"].ToString()), Convert.ToDouble(result["name"].ToString()));
+                    return qd.AddAirport(result["name"].ToString(), result["city"].ToString(), result["country"].ToString(),
+                        result["IATA"].ToString(), result["ICAO"].ToString(), Convert.ToDouble(result["lat"].ToString()),
+                        Convert.ToDouble(result["lon"].ToString()), Convert.ToDouble(result["timezone"].ToString()));
                 }
                 else if (request.RequestUri.AbsolutePath == "/api/Values/remove_airport")
                 {
@@ -136,6 +136,15 @@ namespace FlightsServer.Controllers
                 {
                     return qd.RemoveAirplane(result["IATA"].ToString());
                 }
+                else if (request.RequestUri.AbsolutePath == "/api/Values/add_airline")
+                {
+                    return qd.AddAirline(result["name"].ToString(), result["IATA"].ToString(), result["ICAO"].ToString(), 
+                        bool.Parse(result["is_active"].ToString()), Convert.ToInt32(result["rating"].ToString()));
+                }
+                //else if (request.RequestUri.AbsolutePath == "/api/Values/remove_airline")
+                //{
+                //    return qd.RemoveAirline(result["id"].ToString());
+                //}
                 else if (request.RequestUri.AbsolutePath == "/api/Values/sign_up")
                 {
                     return qd.SignUp(result["email"].ToString(), result["full_name"].ToString(), DateTime.Parse(result["DOB"].ToString()), result["passport_id"].ToString());
@@ -144,6 +153,7 @@ namespace FlightsServer.Controllers
                 {
                     response.Content = new StringContent(qd.IsAdmin(result["email"].ToString(), result["password"].ToString()), Encoding.UTF8, "application/json");
                 }
+                
 
             }
             catch (Exception e)
