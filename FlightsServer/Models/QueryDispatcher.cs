@@ -574,10 +574,10 @@ namespace FlightsServer.Models
             if(tableValues[0].Count > 0 && tableValues[0][headers["password"]] == password)
             {
                 result.is_admin = "true";
-                return result;
+                return result.ToString();
             }
             result.is_admin = "false";
-            return result;
+            return result.ToString();
 
         }
     }
