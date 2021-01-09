@@ -130,7 +130,7 @@ namespace FlightsServer.Controllers
                 else if (request.RequestUri.AbsolutePath == "/api/Values/add_airplane")
                 {
                     return qd.AddAirplane(result["name"].ToString(), result["IATA"].ToString(), result["ICAO"].ToString(),
-                        Convert.ToInt32(result["name"].ToString()), Convert.ToInt32(result["name"].ToString()));
+                        Convert.ToInt32(result["cruise_speed"].ToString()), Convert.ToInt32(result["num_of_seats"].ToString()));
                 }
                 else if (request.RequestUri.AbsolutePath == "/api/Values/remove_airplane")
                 {
