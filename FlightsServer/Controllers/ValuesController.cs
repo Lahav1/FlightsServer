@@ -111,6 +111,10 @@ namespace FlightsServer.Controllers
                 {
                     qd.RemoveRoute(result["route_id"].ToString());
                 }
+                else if (request.RequestUri.AbsolutePath == "/api/Values/sign_up")
+                {
+                    return qd.SignUp(result["email"].ToString(), result["full_name"].ToString(), DateTime.Parse(result["DOB"].ToString()), result["passport_id"].ToString());
+                }
 
             }
             catch (Exception e)

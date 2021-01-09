@@ -5,7 +5,8 @@ using System.Linq;
 using Newtonsoft.Json.Linq;
 using System.Net;
 using System.Net.Mail;
-
+using System.Net.Http;
+using System.ComponentModel.DataAnnotations;
 
 namespace FlightsServer.Models
 {
@@ -518,6 +519,33 @@ namespace FlightsServer.Models
                 reservationsResults.Add(reservationObj);
             }
             return reservationsResults.ToString();
+        }
+
+
+        /// <summary>
+        /// The function adds a new user to the user db.
+        /// </summary>
+        /// <param name="email">The user's unique email.</param>
+        /// <param name="fullName">The user's full name.</param>
+        /// <param name="DOB">The user date of birth.</param>
+        /// <param name="passportID">The user's passport id (not unique).</param>
+        /// <returns></returns>
+        public HttpResponseMessage SignUp(string email, string fullName, DateTime DOB, string passportID)
+        {
+            HttpResponseMessage response = new HttpResponseMessage();
+            var foo = new EmailAddressAttribute();
+            response.StatusCode = HttpStatusCode.OK;
+            string query = $"SELECT COUNT(*) FROM user WHERE email='{email}';";
+            Tuple<Dictionary<string, int>, List<List<string>>> reservations = dbh.ExecuteQuery(query);
+
+            if (Convert.ToInt32(reservations.Item2[0][0]) > 0 || !foo.IsValid(email))
+            {
+                response.StatusCode = HttpStatusCode.BadRequest;
+                return response;
+            }
+            query = $"INSERT INTO user VALUES('{email}', '{fullName}', '{DOB.ToString("yyyy-MM-dd")}', '{passportID}');";
+            dbh.ExecuteNonQuery(new List<string>() { query });
+            return response;
         }
     }
 }
