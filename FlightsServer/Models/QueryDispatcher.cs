@@ -348,7 +348,7 @@ namespace FlightsServer.Models
             var respone = new HttpResponseMessage();
             respone.StatusCode = HttpStatusCode.OK;
             if (dbh.ExecuteQuery($"SELECT COUNT(id) FROM route WHERE id='{routeID}';").Item2[0][0] == "0" ||
-                dbh.ExecuteQuery($"SELECT COUNT(id) FROM airplane WHERE IATA='{airplaneIATA}';").Item2[0][0] == "0")
+                dbh.ExecuteQuery($"SELECT COUNT(IATA) FROM airplane WHERE IATA='{airplaneIATA}';").Item2[0][0] == "0")
             {
                 respone.StatusCode = HttpStatusCode.BadRequest;
                 return respone;
@@ -361,7 +361,7 @@ namespace FlightsServer.Models
             {
                 // TODO: fix MAXID.
                 $"INSERT INTO flight VALUES ('F{maxID + 1}', '{routeID}', '{departureTimeGMT}', '{arrivalTimeGMT}', {numOfSeats}, " +
-                $"{ticketPrice}, '{airplaneIATA}';"
+                $"{ticketPrice}, '{airplaneIATA})';"
         };
 
             dbh.ExecuteNonQuery(query);
