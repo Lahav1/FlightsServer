@@ -118,12 +118,11 @@ namespace FlightsServer.Models
         /// <summary>
         /// The function creates a new reservation from a list of flights.
         /// </summary>
-        /// <param name="userID">The user that wants to order the flights.</param>
+        /// <param name="userEmail">The user that wants to order the flights.</param>
         /// <param name="flights">The list of all the flights.</param>
         /// <param name="numberOfTickets">Number of tickets the user want to purchase.</param>
-        public void CreateNewReservation(string userID, List<string> flights, int numberOfTickets)
+        public void CreateNewReservation(string userEmail, List<string> flights, int numberOfTickets)
         {
-            // TODO: fix the max ID.
             int maxID = 0;
             try
             {
@@ -137,7 +136,7 @@ namespace FlightsServer.Models
             List<string> queries = new List<string>();
             foreach (var flight in flights)
             {
-                queries.Add($"CALL OrderFlight('RS{maxID + 1}', '{userID}', '{flight}', {numberOfTickets});");
+                queries.Add($"CALL OrderFlight('RS{maxID + 1}', '{userEmail}', '{flight}', {numberOfTickets});");
             }
             dbh.ExecuteNonQuery(queries);
         }
@@ -349,7 +348,8 @@ namespace FlightsServer.Models
                 var reservationsHeader = reservationDataQuery.Item1;
 
                 string cancelSubject = $"Cancellation of your {reservation[reservations.Item1["id"]]} flight reservation";
-                string body = $"We are sorry to inform you that due to the cancellation of {reservationData[0][reservationsHeader["airline_name"]]} " +
+                string body = $"Dear {reservationData[0][reservationsHeader["full_name"]]},\n" +
+                    $"we are sorry to inform you that due to the cancellation of {reservationData[0][reservationsHeader["airline_name"]]} " +
                     $"flight {flightID} (flight number {reservationData[0][reservationsHeader["flight_number"]]}) we had " +
                     $"to cancel your {reservation[reservations.Item1["id"]]} reservation from " +
                     $"{reservationData[0][reservationsHeader["departure_airport"]]}" +
