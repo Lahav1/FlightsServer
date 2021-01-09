@@ -571,7 +571,11 @@ namespace FlightsServer.Models
             Tuple<Dictionary<string, int>, List<List<string>>> reservations = dbh.ExecuteQuery(query);
             var headers = reservations.Item1;
             var tableValues = reservations.Item2;
-            if(tableValues[0].Count > 0 && tableValues[0][headers["password"]] == password)
+            if(tableValues.Count == 0)
+            {
+                result.is_admin = "false";
+            }
+            else if (tableValues[0].Count > 0 && tableValues[0][headers["password"]] == password)
             {
                 result.is_admin = "true";
                 return result.ToString();
