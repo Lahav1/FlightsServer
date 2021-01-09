@@ -177,7 +177,7 @@ namespace FlightsServer.Models
             HttpResponseMessage response = new HttpResponseMessage();
             response.StatusCode = HttpStatusCode.OK;
 
-            if (IATA.Length != 3 || ICAO.Length != 4)
+            if (IATA.Length != 2 || ICAO.Length != 3)
             {
                 response.StatusCode = HttpStatusCode.BadRequest;
                 return response;
