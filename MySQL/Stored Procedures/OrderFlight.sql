@@ -2,7 +2,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `OrderFlight`(reservation_id VARCHAR
 proc_label:BEGIN
 
 	-- If there is no user with this id or not enought tickets leave the procedure.
-	IF ((SELECT id FROM user WHERE id=email IS NULL) 
+	IF ((SELECT email FROM user WHERE user.email=email IS NULL) 
 		OR (SELECT available_seats FROM flight WHERE id=flight_number AND available_seats>=number_of_tickets IS null)) THEN
 			LEAVE proc_label;
 	END IF;
