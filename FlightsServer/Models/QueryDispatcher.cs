@@ -486,11 +486,13 @@ namespace FlightsServer.Models
                         destination_airport.longitude = tableValues[i][headers["destination_airport_longitude"]];
                         flight.destination_airport = destination_airport;
 
+                        flight.flight_duration = (DateTime.Parse(tableValues[i][headers["GMT_arrival_time"]]) -
+                            DateTime.Parse(tableValues[i][headers["GMT_departure_time"]])).ToString();
+
                         reservationObj.price += Convert.ToInt32(tableValues[i][headers["ticket_price"]]) *
                             Convert.ToInt32(tableValues[i][headers["number_of_passangers"]]);
 
-
-                        if(i < tableValues.Count - 1)
+                        if (i < tableValues.Count - 1)
                         {
                             nextReservationID = tableValues[i + 1][headers["reservation_id"]];
 
@@ -507,6 +509,11 @@ namespace FlightsServer.Models
                         i++;
                     }
                 }
+                reservationObj.total_flight_duration = 
+                    (DateTime.Parse(tableValues[tableValues.Count - 1][headers["GMT_arrival_time"]]) -
+                    DateTime.Parse(tableValues[0][headers["GMT_departure_time"]])).ToString();
+
+
                 reservationObj.fiights = reservationFlights;
                 reservationsResults.Add(reservationObj);
             }
