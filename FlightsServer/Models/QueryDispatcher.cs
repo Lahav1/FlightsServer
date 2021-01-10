@@ -565,15 +565,16 @@ namespace FlightsServer.Models
 
                         }
                         reservationFlights.Add(flight);
-
                         i++;
                     }
                 }
-                reservationObj.total_flight_duration = 
-                    (DateTime.Parse(tableValues[tableValues.Count - 1][headers["GMT_arrival_time"]]) -
-                    DateTime.Parse(tableValues[0][headers["GMT_departure_time"]])).ToString();
-
-
+                //************ Calculate total duration of reservation.
+                string metaqQuery = $"CALL FindReservationData('{lastReservationID}');";
+                Tuple<Dictionary<string, int>, List<List<string>>> metadata = dbh.ExecuteQuery(metaqQuery);
+                var metadataHeaders = metadata.Item1;
+                var metadataTableValues = metadata.Item2;
+                reservationObj.total_duration = metadataTableValues[0][metadataHeaders["total_flight_duration"]];
+                //************
                 reservationObj.flights = reservationFlights;
                 reservationsResults.Add(reservationObj);
             }
