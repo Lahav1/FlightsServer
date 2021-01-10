@@ -37,7 +37,7 @@ namespace FlightsServer.Models
             string config = DatabaseUtils.ReadFile(configFilePath);
             JObject parsedConfig = JObject.Parse(config);
             this.emailAddress = parsedConfig["Server"]["Email"]["address"].ToString();
-            this.emailAddress = parsedConfig["Server"]["Email"]["password"].ToString();
+            this.emailPassword = parsedConfig["Server"]["Email"]["password"].ToString();
         }
 
 
