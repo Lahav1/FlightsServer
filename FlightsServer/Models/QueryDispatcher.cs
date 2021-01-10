@@ -282,7 +282,7 @@ namespace FlightsServer.Models
                 .Item2[0][0]); 
             List<string> query = new List<string>()
             {
-                $"INSERT INTO airport VALUES ('AP{maxID + 1}', '{name}', '{city}', '{country}', '{IATA}', '{ICAO}', {lat}, {lon}, {timezone});"
+                $"INSERT INTO airport VALUES ('AP{maxID + 1}', '{name}', '{city}', '{country}', '{IATA}', '{ICAO}', {lat}, {lon}, {timezone}, 0, 0);"
             };
             dbh.ExecuteNonQuery(query);
             return response;
