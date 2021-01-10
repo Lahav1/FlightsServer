@@ -382,11 +382,11 @@ namespace FlightsServer.Models
             string query = $"SELECT departure_time_GMT FROM flight WHERE id='{flightID}';";
 
             // If it's an old flight, don't remove it.
-            if (DateTime.Compare(DateTime.Parse(dbh.ExecuteQuery(query).Item2[0][0]), DateTime.Now) < 0)
-            {
-                response.StatusCode = HttpStatusCode.BadRequest;
-                return response;
-            }
+            //if (DateTime.Compare(DateTime.Parse(dbh.ExecuteQuery(query).Item2[0][0]), DateTime.Now) < 0)
+            //{
+            //    response.StatusCode = HttpStatusCode.Forbidden;
+            //    return response;
+            //}
             query = $"SELECT id, user FROM reservation WHERE flight='{flightID}';";
             var reservations = dbh.ExecuteQuery(query);
 
@@ -412,6 +412,13 @@ namespace FlightsServer.Models
                 SendEmail(reservation[reservations.Item1["user"]], cancelSubject, body);
                 CancelReservation(reservation[reservations.Item1["id"]]);
             }
+            // Remove the flight.
+            List<string> queries = new List<string>()
+            {
+                $"DELETE FROM flight WHERE id='{flightID}';"
+            };
+            dbh.ExecuteNonQuery(queries);
+
             return response;
         }
 
