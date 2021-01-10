@@ -516,6 +516,13 @@ namespace FlightsServer.Models
                 {
                     if(lastReservationID != nextReservationID)
                     {
+                        //************ Calculate total duration of reservation.
+                        string metaqQuery = $"CALL FindReservationData('{lastReservationID}');";
+                        Tuple<Dictionary<string, int>, List<List<string>>> metadata = dbh.ExecuteQuery(metaqQuery);
+                        var metadataHeaders = metadata.Item1;
+                        var metadataTableValues = metadata.Item2;
+                        reservationObj.duration = metadataTableValues[0][metadataHeaders["total_flight_duration"]];
+                        //************
                         lastReservationID = nextReservationID;
                         break;
                     }
@@ -563,18 +570,24 @@ namespace FlightsServer.Models
                                     DateTime.Parse(tableValues[i][headers["GMT_arrival_time"]].ToString())).ToString();
                             }
 
+                        } 
+                        else
+                        {
+                            //************ Calculate total duration of reservation.
+                            string metaqQuery2 = $"CALL FindReservationData('{lastReservationID}');";
+                            Tuple<Dictionary<string, int>, List<List<string>>> metadata2 = dbh.ExecuteQuery(metaqQuery2);
+                            var metadataHeaders2 = metadata2.Item1;
+                            var metadataTableValues2 = metadata2.Item2;
+                            reservationObj.duration = metadataTableValues2[0][metadataHeaders2["total_flight_duration"]];
+                            //************
                         }
                         reservationFlights.Add(flight);
                         i++;
                     }
                 }
-                //************ Calculate total duration of reservation.
-                string metaqQuery = $"CALL FindReservationData('{lastReservationID}');";
-                Tuple<Dictionary<string, int>, List<List<string>>> metadata = dbh.ExecuteQuery(metaqQuery);
-                var metadataHeaders = metadata.Item1;
-                var metadataTableValues = metadata.Item2;
-                reservationObj.total_duration = metadataTableValues[0][metadataHeaders["total_flight_duration"]];
-                //************
+
+
+
                 reservationObj.flights = reservationFlights;
                 reservationsResults.Add(reservationObj);
             }
