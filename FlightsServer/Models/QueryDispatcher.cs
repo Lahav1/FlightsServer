@@ -393,7 +393,7 @@ namespace FlightsServer.Models
 
             foreach(var reservation in reservations.Item2)
             {
-                query = $"CALL FindReservationData({reservation[reservations.Item1["id"]]});";
+                query = $"CALL FindReservationData('{reservation[reservations.Item1["id"]]}');";
                 var reservationDataQuery = dbh.ExecuteQuery(query);
                 var reservationData = reservationDataQuery.Item2;
                 var reservationsHeader = reservationDataQuery.Item1;
