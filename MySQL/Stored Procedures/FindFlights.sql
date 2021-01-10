@@ -6,18 +6,20 @@ BEGIN
 	CREATE TEMPORARY TABLE IF NOT EXISTS flights_table
     (flight1 VARCHAR(10), flight2 VARCHAR(10), flight3 VARCHAR(10), price INTEGER, duration TIME);
     
+    -- Insert all relevant flights into the 'flights_table' table.
     CALL FindDirectFlightsLocalTime(source_airport, destination_airport, departure_date, number_of_tickets);
     CALL FindConnectingFlightsAndAirports(source_airport, destination_airport, departure_date, number_of_tickets);
     CALL FindThreeConnectingFlightsAndAirports(source_airport, destination_airport, departure_date, number_of_tickets);
-    -- SELECT * FROM flights_table;
     
     DROP TABLE IF EXISTS sorted_flights_table;
 	CREATE TEMPORARY TABLE IF NOT EXISTS sorted_flights_table
     (flight1 VARCHAR(10), flight2 VARCHAR(10), flight3 VARCHAR(10), price INTEGER, duration TIME);
     
+    -- Sort the returned data and choose the top shortest flights and top cheapest flights.
 	INSERT INTO sorted_flights_table (SELECT * FROM flights_table ORDER BY duration, price LIMIT 20);
 	INSERT INTO sorted_flights_table (SELECT * FROM flights_table ORDER BY price, duration LIMIT 20);
 
+	-- Select relevant data of each flight.
     SELECT DISTINCT
 		flight1.id AS flight1_id, CONCAT(airline1.IATA, SUBSTR(flight1.route, 2)) AS flight1_flight_number,
         DATE_ADD(flight1.departure_time_GMT, INTERVAL leg1_src_airport.timezone HOUR) AS flight1_departure_time_local,
@@ -93,5 +95,6 @@ BEGIN
 		LEFT JOIN
 			airport AS leg3_dest_airport ON route3.destination_airport=leg3_dest_airport.id;
 		
+	-- Drop the table after the data was returned to the user.
     DROP TABLE IF EXISTS flights_table, sorted_flights_table;
 END

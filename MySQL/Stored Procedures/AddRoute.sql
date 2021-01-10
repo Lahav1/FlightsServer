@@ -1,6 +1,7 @@
 CREATE DEFINER=`root`@`localhost` PROCEDURE `AddRoute`(src_id VARCHAR(45),
 dest_id VARCHAR(45), airline_id VARCHAR(45), equipment VARCHAR(45))
 proc_label:BEGIN
+	-- Check that the route source airport and destination airport exist, else exit the procedure.
 	IF (SELECT id FROM airport WHERE id=src_id IS NULL) OR
 		(SELECT id FROM airport WHERE id=dest_id IS NULL)
         OR (SELECT id FROM airline WHERE id=airline_id IS NULL) THEN

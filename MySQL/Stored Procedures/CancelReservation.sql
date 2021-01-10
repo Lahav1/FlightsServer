@@ -6,6 +6,7 @@ BEGIN
 	DECLARE flight_id CURSOR FOR SELECT flight FROM reservation WHERE id=reservation_id;
 	DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
 	
+    -- Iterate over all the flights in the reservation and delete them.
 	OPEN flight_id;
 	read_loop: LOOP
         FETCH flight_id INTO flight_number;
