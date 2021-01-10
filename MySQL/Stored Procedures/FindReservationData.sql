@@ -5,7 +5,9 @@ BEGIN
 	CONCAT(source_airport.city, ", ", source_airport.country) AS departure_airport,
 	CONCAT(destination_airport.city, ", ", destination_airport.country) AS destination_airport,
     CONCAT(airline.IATA, SUBSTR(route.id, 2)) AS flight_number,
-    airline.airline_name AS airline_name
+    airline.airline_name AS airline_name,
+	TIMEDIFF(MAX(flight.arrival_time_GMT), MIN(flight.departure_time_GMT)) AS total_flight_duration
+    
 	FROM reservation LEFT JOIN flight ON(reservation.flight=flight.id)
 	LEFT JOIN route ON(flight.route=route.id)
     LEFT JOIN airline ON(route.airline=airline.id)
