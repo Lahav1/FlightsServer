@@ -428,6 +428,7 @@ namespace FlightsServer.Models
         /// <param name="destinationEmail">The customer email.</param>
         /// <param name="subject">The email's subject.</param>
         /// <param name="body">The email's body.</param>
+        /// <param name="recipientName">The recipient's full name.</param>
         private void SendEmail(string destinationEmail, string subject, string body, string recipientName)
         {
 
