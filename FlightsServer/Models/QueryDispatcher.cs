@@ -400,7 +400,7 @@ namespace FlightsServer.Models
 
                 string cancelSubject = $"Cancellation of your {reservation[reservations.Item1["id"]]} flight reservation";
                 string body = $"Dear {reservationData[0][reservationsHeader["full_name"]]},\n" +
-                    $"we are sorry to inform you that due to the cancellation of {reservationData[0][reservationsHeader["airline_name"]]} " +
+                    $"We are sorry to inform you that due to the cancellation of {reservationData[0][reservationsHeader["airline_name"]]} " +
                     $"flight {flightID} (flight number {reservationData[0][reservationsHeader["flight_number"]]}) we had " +
                     $"to cancel your {reservation[reservations.Item1["id"]]} reservation from " +
                     $"{reservationData[0][reservationsHeader["departure_airport"]]}" +
@@ -412,11 +412,11 @@ namespace FlightsServer.Models
                 SendEmail(reservation[reservations.Item1["user"]], cancelSubject, body, reservationData[0][reservationsHeader["full_name"]]);
                 CancelReservation(reservation[reservations.Item1["id"]]);
             }
-            // Remove the flight.
-            List<string> queries = new List<string>()
-            {
+           // Remove the flight.
+           List<string> queries = new List<string>()
+           {
                 $"DELETE FROM flight WHERE id='{flightID}';"
-            };
+           };
             dbh.ExecuteNonQuery(queries);
 
             return response;
@@ -432,7 +432,7 @@ namespace FlightsServer.Models
         private void SendEmail(string destinationEmail, string subject, string body, string recipientName)
         {
 
-            var fromAddress = new MailAddress(this.emailAddress, "Flight Scanner customer service");
+            var fromAddress = new MailAddress(this.emailAddress, "Flight Scanner");
             var toAddress = new MailAddress(destinationEmail, recipientName);
             string fromPassword = this.emailPassword;
 
