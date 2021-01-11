@@ -409,7 +409,7 @@ namespace FlightsServer.Models
                     $"We apologize for the inconvenience.\n" +
                     $"Please visit our website to book a new reservation.";
 
-                SendEmail(reservation[reservations.Item1["user"]], cancelSubject, body);
+                SendEmail(reservation[reservations.Item1["user"]], cancelSubject, body, reservationData[0][reservationsHeader["full_name"]]);
                 CancelReservation(reservation[reservations.Item1["id"]]);
             }
             // Remove the flight.
@@ -428,11 +428,11 @@ namespace FlightsServer.Models
         /// <param name="destinationEmail">The customer email.</param>
         /// <param name="subject">The email's subject.</param>
         /// <param name="body">The email's body.</param>
-        private void SendEmail(string destinationEmail, string subject, string body)
+        private void SendEmail(string destinationEmail, string subject, string body, string recipientName)
         {
 
-            var fromAddress = new MailAddress(this.emailAddress, "Flights booking website");
-            var toAddress = new MailAddress(destinationEmail, destinationEmail);
+            var fromAddress = new MailAddress(this.emailAddress, "Flight Scanner customer service");
+            var toAddress = new MailAddress(destinationEmail, recipientName);
             string fromPassword = this.emailPassword;
 
             var smtp = new SmtpClient
