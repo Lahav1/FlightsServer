@@ -325,13 +325,22 @@ namespace FlightsServer.Models
         /// The function removes the route from the route table.
         /// </summary>
         /// <param name="routeID">The route's id.</param>
-        public void RemoveRoute(string routeID)
+        public HttpResponseMessage RemoveRoute(string routeID)
         {
+            HttpResponseMessage response = new HttpResponseMessage();
+            response.StatusCode = HttpStatusCode.OK;
+            if(Convert.ToInt32(dbh.ExecuteQuery($"SELECT count(id) FROM flight WHERE id={routeID};").Item2[0][0]) == 0)
+            {
+                response.StatusCode = HttpStatusCode.BadRequest;
+                return response;
+            }
+
             List<string> query = new List<string>()
             {
                 $"CALL RemoveRoute('{routeID}');"
             };
             dbh.ExecuteNonQuery(query);
+            return response;
         }
 
 
@@ -388,7 +397,7 @@ namespace FlightsServer.Models
             //    return response;
             //}
 
-            if(Convert.ToInt32(dbh.ExecuteQuery($"SELECT count(id) FROM flight WHERE id={flightID};").Item2[0][0]) == 0)
+            if(Convert.ToInt32(dbh.ExecuteQuery($"SELECT count(id) FROM flight WHERE id='{flightID}';").Item2[0][0]) == 0)
             {
                 response.StatusCode = HttpStatusCode.BadRequest;
                 return response;
