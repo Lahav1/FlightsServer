@@ -261,7 +261,7 @@ namespace FlightsServer.Models
             HttpResponseMessage response = new HttpResponseMessage();
             response.StatusCode = HttpStatusCode.OK;
 
-            if (IATA.Length != 3 || Convert.ToInt32(dbh.ExecuteQuery($"SELECT count(*) FROM airplane WHERE id='{IATA}';").Item2[0][0]) == 0)
+            if (IATA.Length != 3 || Convert.ToInt32(dbh.ExecuteQuery($"SELECT count(IATA) FROM airplane WHERE IATA='{IATA}';").Item2[0][0]) == 0)
             {
                 response.StatusCode = HttpStatusCode.BadRequest;
                 return response;
@@ -293,7 +293,7 @@ namespace FlightsServer.Models
             HttpResponseMessage response = new HttpResponseMessage();
             response.StatusCode = HttpStatusCode.OK;
 
-            if (IATA.Length != 3 || ICAO.Length != 4 || lat < -90 || lat > 90 || lon < -180 || lon > 180)
+            if (IATA.Length != 3 || ICAO.Length != 4 || lat < -90 || lat > 90 || lon < -180 || lon > 180 || timezone < -12 || timezone > 12)
             {
                 response.StatusCode = HttpStatusCode.BadRequest;
                 return response;
@@ -355,7 +355,7 @@ namespace FlightsServer.Models
 
             List<string> query = new List<string>()
             {
-                $"CALL AddRoute('{sourceID}', '{destinationID}', '{destinationID}', '{equipment}');"
+                $"CALL AddRoute('{sourceID}', '{destinationID}', '{airlineID}', '{equipment}');"
             };
             dbh.ExecuteNonQuery(query);
             return response;
@@ -370,7 +370,7 @@ namespace FlightsServer.Models
         {
             HttpResponseMessage response = new HttpResponseMessage();
             response.StatusCode = HttpStatusCode.OK;
-            if(Convert.ToInt32(dbh.ExecuteQuery($"SELECT count(id) FROM flight WHERE id='{routeID}';").Item2[0][0]) == 0)
+            if(Convert.ToInt32(dbh.ExecuteQuery($"SELECT count(id) FROM route WHERE id='{routeID}';").Item2[0][0]) == 0)
             {
                 response.StatusCode = HttpStatusCode.BadRequest;
                 return response;
@@ -391,6 +391,7 @@ namespace FlightsServer.Models
         /// <param name="routeID">The flight's route ID.</param>
         /// <param name="departureTimeGMT">The departure time GMT.</param>
         /// <param name="arrivalTimeGMT">The arrival time GMT.</param>
+        /// <param name="ticketPrice">Ticket price.</param>
         /// <param name="ticketPrice">Ticket price.</param>
         /// <param name="airplaneIATA">Airplane flying the route.</param>
         public HttpResponseMessage AddFlight(string routeID, string departureTimeGMT, string arrivalTimeGMT, int ticketPrice, string airplaneIATA)
