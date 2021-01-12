@@ -387,6 +387,13 @@ namespace FlightsServer.Models
             //    response.StatusCode = HttpStatusCode.Forbidden;
             //    return response;
             //}
+
+            if(Convert.ToInt32(dbh.ExecuteQuery($"SELECT count(id) FROM flight WHERE id={flightID};").Item2[0][0]) == 0)
+            {
+                response.StatusCode = HttpStatusCode.BadRequest;
+                return response;
+            }
+
             query = $"SELECT id, user FROM reservation WHERE flight='{flightID}';";
             var reservations = dbh.ExecuteQuery(query);
 
