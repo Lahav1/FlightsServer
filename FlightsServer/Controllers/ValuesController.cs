@@ -111,11 +111,11 @@ namespace FlightsServer.Controllers
                 }
                 else if(request.RequestUri.AbsolutePath == "/api/Values/add_route")
                 {
-                    qd.AddRoute(result["source_airport"].ToString(), result["destination_airport"].ToString(), result["airline_id"].ToString(), result["equipment"].ToString());
+                    return qd.AddRoute(result["source_airport"].ToString(), result["destination_airport"].ToString(), result["airline_id"].ToString(), result["equipment"].ToString());
                 }
                 else if (request.RequestUri.AbsolutePath == "/api/Values/remove_route")
                 {
-                    qd.RemoveRoute(result["route_id"].ToString());
+                    return qd.RemoveRoute(result["route_id"].ToString());
                 }
                 else if (request.RequestUri.AbsolutePath == "/api/Values/add_airport")
                 {
@@ -125,7 +125,7 @@ namespace FlightsServer.Controllers
                 }
                 else if (request.RequestUri.AbsolutePath == "/api/Values/remove_airport")
                 {
-                    qd.RemoveAirport(result["airport_id"].ToString());
+                    return qd.RemoveAirport(result["airport_id"].ToString());
                 }
                 else if (request.RequestUri.AbsolutePath == "/api/Values/add_airplane")
                 {

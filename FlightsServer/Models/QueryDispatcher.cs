@@ -136,6 +136,7 @@ namespace FlightsServer.Models
             {
                 // Creating first user.
             }
+            // Check if user exists. If not, return an error.
             if (Convert.ToInt32(dbh.ExecuteQuery($"SELECT COUNT(*) FROM user WHERE email='{userEmail}';").Item2[0][0]) == 0)
             {
                 response.StatusCode = HttpStatusCode.BadRequest;
@@ -155,13 +156,24 @@ namespace FlightsServer.Models
         /// The function cancels an existing reservation from the database.
         /// </summary>
         /// <param name="reservationID">The reservation's ID.</param>
-        public void CancelReservation(string reservationID)
+        public HttpResponseMessage CancelReservation(string reservationID)
         {
+            HttpResponseMessage response = new HttpResponseMessage();
+            response.StatusCode = HttpStatusCode.OK;
+
+            // Return a bad request if the reservation ID does not exist.
+            if (Convert.ToInt32(dbh.ExecuteQuery($"SELECT count(id) FROM reservation WHERE id='{reservationID}';").Item2[0][0]) == 0)
+            {
+                response.StatusCode = HttpStatusCode.BadRequest;
+                return response;
+            }
+
             List<string> queries = new List<string>
             {
                 $"CALL CancelReservation('{reservationID}');"
             };
             dbh.ExecuteNonQuery(queries);
+            return response;
         }
 
         /// <summary>
@@ -196,6 +208,13 @@ namespace FlightsServer.Models
         {
             HttpResponseMessage response = new HttpResponseMessage();
             response.StatusCode = HttpStatusCode.OK;
+
+            // Return a bad request if the airline ID does not exist.
+            if (Convert.ToInt32(dbh.ExecuteQuery($"SELECT count(id) FROM airline WHERE id='{airlineID}';").Item2[0][0]) == 0)
+            {
+                response.StatusCode = HttpStatusCode.BadRequest;
+                return response;
+            }
 
             List<string> query = new List<string>()
             {
@@ -242,11 +261,12 @@ namespace FlightsServer.Models
             HttpResponseMessage response = new HttpResponseMessage();
             response.StatusCode = HttpStatusCode.OK;
 
-            if (IATA.Length != 3)
+            if (IATA.Length != 3 || Convert.ToInt32(dbh.ExecuteQuery($"SELECT count(*) FROM airplane WHERE id='{IATA}';").Item2[0][0]) == 0)
             {
                 response.StatusCode = HttpStatusCode.BadRequest;
                 return response;
             }
+
             List<string> query = new List<string>()
             {
                 $"DELETE FROM airplane WHERE IATA='{IATA}';"
@@ -293,14 +313,24 @@ namespace FlightsServer.Models
         /// The function removes an airport for the airport table.
         /// </summary>
         /// <param name="id">The airport's id.</param>
-        public void RemoveAirport(string id)
+        public HttpResponseMessage RemoveAirport(string id)
         {
+            HttpResponseMessage response = new HttpResponseMessage();
+            response.StatusCode = HttpStatusCode.OK;
+            // If the airport ID does not exist - return a bad request.
+            if (Convert.ToInt32(dbh.ExecuteQuery($"SELECT count(id) FROM airport WHERE id='{id}';").Item2[0][0]) == 0)
+            {
+                response.StatusCode = HttpStatusCode.BadRequest;
+                return response;
+            }
+
             List<string> query = new List<string>()
             {
                 $"DELETE FROM airport WHERE id='{id}';"
                 
             };
             dbh.ExecuteNonQuery(query);
+            return response;
         }
 
 
@@ -311,13 +341,24 @@ namespace FlightsServer.Models
         /// <param name="destinationID">The id of the destination airport.</param>
         /// <param name="airlineID">The airline's ID.</param>
         /// <param name="equipment">The airplanes that can fly that route.</param>
-        public void AddRoute(string sourceID, string destinationID, string airlineID, string equipment)
+        public HttpResponseMessage AddRoute(string sourceID, string destinationID, string airlineID, string equipment)
         {
+            HttpResponseMessage response = new HttpResponseMessage();
+            response.StatusCode = HttpStatusCode.OK;
+            if (Convert.ToInt32(dbh.ExecuteQuery($"SELECT count(id) FROM airport WHERE id='{sourceID}';").Item2[0][0]) == 0 ||
+                Convert.ToInt32(dbh.ExecuteQuery($"SELECT count(id) FROM airport WHERE id='{destinationID}';").Item2[0][0]) == 0 ||
+                Convert.ToInt32(dbh.ExecuteQuery($"SELECT count(id) FROM airline WHERE id='{airlineID}';").Item2[0][0]) == 0)
+            {
+                response.StatusCode = HttpStatusCode.BadRequest;
+                return response;
+            }
+
             List<string> query = new List<string>()
             {
                 $"CALL AddRoute('{sourceID}', '{destinationID}', '{destinationID}', '{equipment}');"
             };
             dbh.ExecuteNonQuery(query);
+            return response;
         }
 
 
@@ -329,7 +370,7 @@ namespace FlightsServer.Models
         {
             HttpResponseMessage response = new HttpResponseMessage();
             response.StatusCode = HttpStatusCode.OK;
-            if(Convert.ToInt32(dbh.ExecuteQuery($"SELECT count(id) FROM flight WHERE id={routeID};").Item2[0][0]) == 0)
+            if(Convert.ToInt32(dbh.ExecuteQuery($"SELECT count(id) FROM flight WHERE id='{routeID}';").Item2[0][0]) == 0)
             {
                 response.StatusCode = HttpStatusCode.BadRequest;
                 return response;
@@ -351,7 +392,7 @@ namespace FlightsServer.Models
         /// <param name="departureTimeGMT">The departure time GMT.</param>
         /// <param name="arrivalTimeGMT">The arrival time GMT.</param>
         /// <param name="ticketPrice">Ticket price.</param>
-        /// <param name="airplane">Airplane flying the route.</param>
+        /// <param name="airplaneIATA">Airplane flying the route.</param>
         public HttpResponseMessage AddFlight(string routeID, string departureTimeGMT, string arrivalTimeGMT, int ticketPrice, string airplaneIATA)
         {
             var respone = new HttpResponseMessage();
